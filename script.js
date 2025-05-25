@@ -35,7 +35,7 @@ async function initializeSubCount() {
         goalText.innerText = 'Error al cargar datos';
         // Inicialización manual como respaldo
         console.log('Usando conteo manual como respaldo: 651');
-        currentSubs = 651;
+        currentSubs = 0;
         updateGoalText();
     }
 }
