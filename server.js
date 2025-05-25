@@ -7,8 +7,8 @@ app.use(express.static('.'));
 
 app.get('/subs', async (req, res) => {
     const channelName = req.query.channelName || 'blackelespanolito';
-    const clientId = 'gp762nuuoqcoxypju8c569th9wz7q5'; // TWITCH_CLIENT_ID
-    const accessToken = '6s1g5z1old5ku6t6i0xg68e6gabmk8'; // TWITCH_TOKEN
+    const clientId = 'gp762nuuoqcoxypju8c569th9wz7q5'; // Twitch Client ID
+    const accessToken = '9t92yowa2wp0rdag05du4bi3dv95y9'; // Twitch Access Token
 
     try {
         console.log(`Obteniendo ID del canal para ${channelName}...`);
