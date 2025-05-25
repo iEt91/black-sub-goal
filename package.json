@@ -10,7 +10,9 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "express": "^4.17.1"
+        "express": "^4.17.1",
+        "axios": "^1.6.0",
+        "tmi.js": "^1.8.5"
     },
     "description": ""
 }
