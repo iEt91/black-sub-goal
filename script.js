@@ -1,57 +1,73 @@
 // Configuración inicial
 const channelName = 'blackelespanolito';
 const clientId = 'gp762nuuoqcoxypju8c569th9wz7q5';
-const accessToken = '9t92yowa2wp0rdag05du4bi3dv95y9'; // Token válido
+const accessToken = '9t92yowa2wp0rdag05du4bi3dv95y9';
 let currentSubs = 0;
-let goalSubs = 100; // Meta inicial por defecto
+let goalSubs = 100;
 
 // Elemento del DOM
 const goalText = document.getElementById('goal-text');
 
 // Función para actualizar el texto
 function updateGoalText() {
-    console.log(`Actualizando texto: Meta: ${currentSubs}/${goalSubs}`); // Depuración
+    console.log(`Actualizando texto: Meta: ${currentSubs}/${goalSubs}`);
     goalText.innerText = `Meta: ${currentSubs}/${goalSubs}`;
 }
 
 // Inicializar el conteo de suscriptores usando la API de Twitch
 async function initializeSubCount() {
-    console.log('Iniciando solicitud para obtener suscriptores...'); // Depuración
+    console.log('Iniciando solicitud para obtener suscriptores...');
     try {
+        // Obtener el ID del canal
         const userResponse = await fetch(`https://api.twitch.tv/helix/users?login=${channelName}`, {
+            method: 'GET',
             headers: {
                 'Client-ID': clientId,
-                'Authorization': `Bearer ${accessToken}`
+                'Authorization': `Bearer ${accessToken}`,
+                'Accept': 'application/json'
             }
         });
         if (!userResponse.ok) {
-            throw new Error(`Error al obtener el ID del canal: ${userResponse.statusText} (${userResponse.status})`);
+            const errorText = await userResponse.text();
+            throw new Error(`Error al obtener el ID del canal: ${userResponse.status} - ${errorText}`);
         }
         const userData = await userResponse.json();
-        console.log('User Data:', userData); // Depuración
+        console.log('User Data:', userData);
+        if (!userData.data || !userData.data[0] || !userData.data[0].id) {
+            throw new Error('No se pudo obtener el ID del canal');
+        }
         const channelId = userData.data[0].id;
+        console.log('Channel ID:', channelId);
 
+        // Obtener el conteo de suscriptores
         const subsResponse = await fetch(`https://api.twitch.tv/helix/subscriptions?broadcaster_id=${channelId}`, {
+            method: 'GET',
             headers: {
                 'Client-ID': clientId,
-                'Authorization': `Bearer ${accessToken}`
+                'Authorization': `Bearer ${accessToken}`,
+                'Accept': 'application/json'
             }
         });
         if (!subsResponse.ok) {
-            throw new Error(`Error al obtener suscriptores: ${subsResponse.statusText} (${subsResponse.status})`);
+            const errorText = await subsResponse.text();
+            throw new Error(`Error al obtener suscriptores: ${subsResponse.status} - ${errorText}`);
         }
         const subsData = await subsResponse.json();
-        console.log('Subs Data:', subsData); // Depuración
+        console.log('Subs Data:', subsData);
         if (subsData.total !== undefined) {
             currentSubs = subsData.total;
-            console.log(`Conteo de suscriptores inicializado: ${currentSubs}`); // Depuración
+            console.log(`Conteo de suscriptores inicializado: ${currentSubs}`);
         } else {
             throw new Error('El campo "total" no está presente en la respuesta de suscriptores');
         }
         updateGoalText();
     } catch (error) {
-        console.error('Error al obtener suscriptores iniciales:', error);
+        console.error('Error al obtener suscriptores iniciales:', error.message);
         goalText.innerText = 'Error al cargar datos';
+        // Inicialización manual como respaldo
+        console.log('Usando conteo manual como respaldo: 651');
+        currentSubs = 651;
+        updateGoalText();
     }
 }
 
@@ -69,20 +85,20 @@ client.connect();
 // Escuchar eventos de suscripción
 client.on('subscription', (channel, username, method, message, userstate) => {
     currentSubs++;
-    console.log(`Nueva suscripción detectada, conteo actual: ${currentSubs}`); // Depuración
+    console.log(`Nueva suscripción detectada, conteo actual: ${currentSubs}`);
     updateGoalText();
 });
 
 // Escuchar eventos de resuscripción
 client.on('resub', (channel, username, months, message, userstate, method) => {
     currentSubs++;
-    console.log(`Resuscripción detectada, conteo actual: ${currentSubs}`); // Depuración
+    console.log(`Resuscripción detectada, conteo actual: ${currentSubs}`);
     updateGoalText();
 });
 
 // Escuchar comandos en el chat
 client.on('message', (channel, userstate, message, self) => {
-    if (self) return; // Ignorar mensajes del bot
+    if (self) return;
 
     if (message.startsWith('!setmeta')) {
         const parts = message.split(' ');
@@ -90,7 +106,7 @@ client.on('message', (channel, userstate, message, self) => {
             const newGoal = parseInt(parts[1]);
             if (newGoal > 0) {
                 goalSubs = newGoal;
-                console.log(`Nueva meta establecida: ${goalSubs}`); // Depuración
+                console.log(`Nueva meta establecida: ${goalSubs}`);
                 updateGoalText();
             }
         }
