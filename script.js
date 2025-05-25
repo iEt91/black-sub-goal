@@ -1,5 +1,6 @@
 // Configuración inicial
 const channelName = 'blackelespanolito';
+const botToken = 'oauth:xxxxxxxxxxxxxxxxxxxxxxxxxx'; // Reemplaza con el token OAuth de tu bot
 let currentSubs = 0;
 let goalSubs = 100;
 
@@ -33,10 +34,6 @@ async function initializeSubCount() {
     } catch (error) {
         console.error('Error al obtener suscriptores iniciales:', error.message);
         goalText.innerText = 'Error al cargar datos';
-        // Inicialización manual como respaldo
-        console.log('Usando conteo manual como respaldo: 651');
-        currentSubs = 0;
-        updateGoalText();
     }
 }
 
@@ -48,16 +45,36 @@ function onTmiLoaded() {
         return;
     }
 
-    // Conectar el bot al chat de Twitch
+    // Conectar el bot al chat de Twitch con autenticación
     const client = new tmi.Client({
+        options: { debug: true },
         connection: {
             secure: true,
             reconnect: true
         },
+        identity: {
+            username: 'tangov91_bot', // Reemplaza con el nombre de tu bot
+            password: botToken
+        },
         channels: [channelName]
     });
 
-    client.connect();
+    // Depuración de la conexión
+    client.on('connected', (address, port) => {
+        console.log(`Bot conectado al chat de ${channelName} en ${address}:${port}`);
+    });
+
+    client.on('disconnected', (reason) => {
+        console.error(`Bot desconectado del chat: ${reason}`);
+    });
+
+    client.on('reconnect', () => {
+        console.log('Intentando reconectar al chat...');
+    });
+
+    client.connect().catch(error => {
+        console.error('Error al conectar al chat:', error);
+    });
 
     // Escuchar eventos de suscripción
     client.on('subscription', (channel, username, method, message, userstate) => {
@@ -73,9 +90,13 @@ function onTmiLoaded() {
         updateGoalText();
     });
 
-    // Escuchar comandos en el chat
+    // Escuchar mensajes en el chat
     client.on('message', (channel, userstate, message, self) => {
-        if (self) return;
+        console.log(`Mensaje recibido en el chat: ${message} (de ${userstate['display-name']})`);
+        if (self) {
+            console.log('Ignorando mensaje del bot');
+            return;
+        }
 
         if (message.startsWith('!setmeta')) {
             const parts = message.split(' ');
@@ -85,7 +106,11 @@ function onTmiLoaded() {
                     goalSubs = newGoal;
                     console.log(`Nueva meta establecida: ${goalSubs}`);
                     updateGoalText();
+                } else {
+                    console.log('Meta inválida: debe ser mayor que 0');
                 }
+            } else {
+                console.log('Comando !setmeta inválido. Uso: !setmeta <número>');
             }
         }
     });
@@ -94,7 +119,7 @@ function onTmiLoaded() {
 // Inicializar el conteo de suscriptores al cargar
 initializeSubCount();
 
-// Si tmi.js ya está cargado (por algún motivo), ejecutamos la lógica directamente
+// Si tmi.js ya está cargado, ejecutamos la lógica directamente
 if (typeof tmi !== 'undefined') {
     onTmiLoaded();
 } else {
