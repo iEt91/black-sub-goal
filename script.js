@@ -1,6 +1,6 @@
 // Configuración inicial
 const channelName = 'blackelespanolito';
-const botToken = 'oauth:xxxxxxxxxxxxxxxxxxxxxxxxxx'; // Reemplaza con el token OAuth de tu bot
+const botToken = 'oauth:iuqvd34781uy66mq2vu1662bzuhruo'; // Reemplaza con el token OAuth de tu bot
 let currentSubs = 0;
 let goalSubs = 100;
 
@@ -99,6 +99,13 @@ function onTmiLoaded() {
         }
 
         if (message.startsWith('!setmeta')) {
+            // Verificar si el usuario es moderador o el dueño del canal
+            const isMod = userstate.mod || userstate['display-name'].toLowerCase() === channelName.toLowerCase();
+            if (!isMod) {
+                console.log(`Usuario ${userstate['display-name']} no tiene permisos para usar !setmeta`);
+                return;
+            }
+
             const parts = message.split(' ');
             if (parts.length === 2 && !isNaN(parts[1])) {
                 const newGoal = parseInt(parts[1]);
