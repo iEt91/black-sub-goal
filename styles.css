@@ -9,9 +9,9 @@ html, body {
 
 #goal-text {
     color: white;
-    font-size: 24px;
+    font-size: 72px;
     font-family: Arial, sans-serif;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Sombra suave */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     padding: 10px;
     background: transparent;
     width: 100%;

@@ -1,6 +1,6 @@
 // Configuración inicial
 const channelName = 'blackelespanolito';
-const botToken = 'oauth:iuqvd34781uy66mq2vu1662bzuhruo'; // Reemplaza con el token OAuth de tu bot
+const botToken = 'oauth:bnqh40i4tkufflbb74vnmt443w1nk5'; // TWITCH_OAUTH
 let currentSubs = 0;
 let goalSubs = 100;
 
@@ -53,7 +53,7 @@ function onTmiLoaded() {
             reconnect: true
         },
         identity: {
-            username: 'tangov91_bot', // Reemplaza con el nombre de tu bot
+            username: 'tangov91_bot', // BOT_USERNAME
             password: botToken
         },
         channels: [channelName]
@@ -79,14 +79,14 @@ function onTmiLoaded() {
     // Escuchar eventos de suscripción
     client.on('subscription', (channel, username, method, message, userstate) => {
         currentSubs++;
-        console.log(`Nueva suscripción detectada, conteo actual: ${currentSubs}`);
+        console.log(`Nueva suscripción detectada: ${username}, conteo actual: ${currentSubs}`);
         updateGoalText();
     });
 
     // Escuchar eventos de resuscripción
     client.on('resub', (channel, username, months, message, userstate, method) => {
         currentSubs++;
-        console.log(`Resuscripción detectada, conteo actual: ${currentSubs}`);
+        console.log(`Resuscripción detectada: ${username} (meses: ${months}), conteo actual: ${currentSubs}`);
         updateGoalText();
     });
 
@@ -99,7 +99,6 @@ function onTmiLoaded() {
         }
 
         if (message.startsWith('!setmeta')) {
-            // Verificar si el usuario es moderador o el dueño del canal
             const isMod = userstate.mod || userstate['display-name'].toLowerCase() === channelName.toLowerCase();
             if (!isMod) {
                 console.log(`Usuario ${userstate['display-name']} no tiene permisos para usar !setmeta`);
