@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Configurar Widget de Meta de Suscriptores</title>
+</head>
+<body>
+    <h1>Configurar Widget de Meta de Suscriptores</h1>
+    <form id="config-form">
+        <label>Twitch Channel Name: <input type="text" id="channel-name" value="blackelespanolito"></label><br>
+        <label>Meta de Suscriptores: <input type="number" id="goal-subs" value="100"></label><br>
+        <button type="submit">Generar Widget</button>
+    </form>
+    <p id="widget-url"></p>
+    <script>
+        document.getElementById('config-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const channelName = document.getElementById('channel-name').value;
+            const goalSubs = document.getElementById('goal-subs').value;
+
+            const url = `${window.location.origin}/index.html?channelName=${encodeURIComponent(channelName)}&goalSubs=${encodeURIComponent(goalSubs)}`;
+            document.getElementById('widget-url').innerHTML = `Usa esta URL en OBS: <a href="${url}" target="_blank">${url}</a>`;
+            window.location.href = url;
+        });
+    </script>
+</body>
+</html>
