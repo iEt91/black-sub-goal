@@ -1,6 +1,6 @@
 // Configuración inicial
 const channelName = 'blackelespanolito';
-const botToken = 'oauth:bnqh40i4tkufflbb74vnmt443w1nk5'; // TWITCH_OAUTH
+const botToken = 'oauth:fxb7gty1wqm2zwb9u4bzl7fhmptyga'; // Nuevo access_token
 let currentSubs = 0;
 let goalSubs = 100;
 
@@ -37,6 +37,16 @@ async function initializeSubCount() {
     }
 }
 
+// Función para cargar tmi.js localmente si el CDN falla
+function loadLocalTmi() {
+    console.log('CDN falló, intentando cargar tmi.js localmente...');
+    const script = document.createElement('script');
+    script.src = '/node_modules/tmi.js/dist/tmi.min.js';
+    script.onload = onTmiLoaded;
+    script.onerror = () => console.error('Error al cargar tmi.js localmente');
+    document.head.appendChild(script);
+}
+
 // Función que se ejecuta cuando tmi.js se carga
 function onTmiLoaded() {
     console.log('tmi.js cargado correctamente');
@@ -53,7 +63,7 @@ function onTmiLoaded() {
             reconnect: true
         },
         identity: {
-            username: 'tangov91_bot', // BOT_USERNAME
+            username: 'tangov91_bot',
             password: botToken
         },
         channels: [channelName]
