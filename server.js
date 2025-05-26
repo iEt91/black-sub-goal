@@ -8,7 +8,7 @@ app.use(express.static('.'));
 app.get('/subs', async (req, res) => {
     const channelName = req.query.channelName || 'blackelespanolito';
     const clientId = '85b7pc94m2rofqg52m7o8jcvc9ywrq';
-    const accessToken = 'fxb7gty1wqm2zwb9u4bzl7fhmptyga'; // Nuevo access_token
+    const accessToken = 'fxb7gty1wqm2zwb9u4bzl7fhmptyga';
 
     try {
         console.log(`Obteniendo ID del canal para ${channelName}...`);
