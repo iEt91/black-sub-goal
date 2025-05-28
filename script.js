@@ -1,19 +1,13 @@
-// Configuración inicial
 const channelName = 'blackelespanolito';
-const botToken = 'oauth:fxb7gty1wqm2zwb9u4bzl7fhmptyga';
 let currentSubs = 0;
 let goalSubs = 100;
 let goalTextLabel = 'Meta';
-
-// Elemento del DOM
 const goalText = document.getElementById('goal-text');
 
-// Función para actualizar el texto
 function updateGoalText() {
     goalText.innerText = `${goalTextLabel}: ${currentSubs} / ${goalSubs}`;
 }
 
-// Inicializar el conteo de suscriptores desde el servidor
 async function initializeSubCount() {
     try {
         const response = await fetch(`/subs?channelName=${channelName}`);
@@ -31,7 +25,6 @@ async function initializeSubCount() {
     }
 }
 
-// Inicializar tmi.js y conectarse al chat
 function onTmiLoaded() {
     const client = new tmi.Client({
         options: { debug: true },
@@ -41,7 +34,7 @@ function onTmiLoaded() {
         },
         identity: {
             username: 'tangov91_bot',
-            password: botToken
+            password: 'oauth:fxb7gty1wqm2zwb9u4bzl7fhmptyga'
         },
         channels: ['tangov91']
     });
@@ -83,6 +76,5 @@ function onTmiLoaded() {
     });
 }
 
-// Iniciar
 initializeSubCount();
 onTmiLoaded();
