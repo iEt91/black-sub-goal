@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // Configuración inicial
 const channelName = 'blackelespanolito';
 const botToken = 'oauth:fxb7gty1wqm2zwb9u4bzl7fhmptyga';
