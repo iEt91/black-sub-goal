@@ -13,7 +13,6 @@
         "express": "^4.17.1",
         "axios": "^1.6.0"
     },
-    "description": ""
 {
     "name": "simple-sub-goal-widget",
     "version": "1.0.0",
@@ -29,6 +28,3 @@
         "express": "^4.17.1",
         "axios": "^1.6.0"
     },
-    "description": ""
->>>>>>> 4e4f73bda34b50a766173f5f6f5e160208660e89
-}
