@@ -1,45 +1,38 @@
 // Configuración inicial
 const channelName = 'blackelespanolito';
-const botToken = 'oauth:fxb7gty1wqm2zwb9u4bzl7fhmptyga'; // Nuevo access_token
+const botToken = 'oauth:fxb7gty1wqm2zwb9u4bzl7fhmptyga';
 let currentSubs = 0;
 let goalSubs = 100;
+let goalTextLabel = 'Meta';
 
 // Elemento del DOM
 const goalText = document.getElementById('goal-text');
 
 // Función para actualizar el texto
 function updateGoalText() {
-    console.log(`Actualizando texto: Meta: ${currentSubs}/${goalSubs}`);
-    goalText.innerText = `Meta: ${currentSubs}/${goalSubs}`;
+    goalText.innerText = `${goalTextLabel}: ${currentSubs} / ${goalSubs}`;
 }
 
 // Inicializar el conteo de suscriptores desde el servidor
 async function initializeSubCount() {
-    console.log('Iniciando solicitud para obtener suscriptores...');
     try {
         const response = await fetch(`/subs?channelName=${channelName}`);
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Error al obtener suscriptores desde el servidor: ${response.status} - ${errorText}`);
-        }
+        if (!response.ok) throw new Error(`Error al obtener subs: ${response.statusText}`);
         const data = await response.json();
-        console.log('Server Subs Data:', data);
         if (data.total !== undefined) {
             currentSubs = data.total;
-            console.log(`Conteo de suscriptores inicializado: ${currentSubs}`);
         } else {
-            throw new Error('El campo "total" no está presente en la respuesta del servidor');
+            throw new Error('Respuesta inválida del servidor');
         }
         updateGoalText();
     } catch (error) {
-        console.error('Error al obtener suscriptores iniciales:', error.message);
+        console.error('Error al cargar subs:', error.message);
         goalText.innerText = 'Error al cargar datos';
     }
 }
 
-// Función para cargar tmi.js localmente si el CDN falla
+// Cargar tmi.js localmente si falla el CDN
 function loadLocalTmi() {
-    console.log('CDN falló, intentando cargar tmi.js localmente...');
     const script = document.createElement('script');
     script.src = '/node_modules/tmi.js/dist/tmi.min.js';
     script.onload = onTmiLoaded;
@@ -47,15 +40,13 @@ function loadLocalTmi() {
     document.head.appendChild(script);
 }
 
-// Función que se ejecuta cuando tmi.js se carga
+// Inicializar tmi.js y conectarse al chat
 function onTmiLoaded() {
-    console.log('tmi.js cargado correctamente');
     if (typeof tmi === 'undefined') {
-        console.error('tmi.js no está definido después de cargar');
+        console.error('tmi.js no disponible');
         return;
     }
 
-    // Conectar el bot al chat de Twitch con autenticación
     const client = new tmi.Client({
         options: { debug: true },
         connection: {
@@ -66,78 +57,50 @@ function onTmiLoaded() {
             username: 'tangov91_bot',
             password: botToken
         },
-        channels: [channelName]
+        channels: ['tangov91']
     });
 
-    // Depuración de la conexión
-    client.on('connected', (address, port) => {
-        console.log(`Bot conectado al chat de ${channelName} en ${address}:${port}`);
-    });
+    client.connect().catch(console.error);
 
-    client.on('disconnected', (reason) => {
-        console.error(`Bot desconectado del chat: ${reason}`);
-    });
-
-    client.on('reconnect', () => {
-        console.log('Intentando reconectar al chat...');
-    });
-
-    client.connect().catch(error => {
-        console.error('Error al conectar al chat:', error);
-    });
-
-    // Escuchar eventos de suscripción
-    client.on('subscription', (channel, username, method, message, userstate) => {
+    client.on('subscription', (channel, username) => {
         currentSubs++;
-        console.log(`Nueva suscripción detectada: ${username}, conteo actual: ${currentSubs}`);
         updateGoalText();
     });
 
-    // Escuchar eventos de resuscripción
-    client.on('resub', (channel, username, months, message, userstate, method) => {
+    client.on('resub', (channel, username) => {
         currentSubs++;
-        console.log(`Resuscripción detectada: ${username} (meses: ${months}), conteo actual: ${currentSubs}`);
         updateGoalText();
     });
 
-    // Escuchar mensajes en el chat
     client.on('message', (channel, userstate, message, self) => {
-        console.log(`Mensaje recibido en el chat: ${message} (de ${userstate['display-name']})`);
-        if (self) {
-            console.log('Ignorando mensaje del bot');
-            return;
-        }
+        if (self) return;
 
-        if (message.startsWith('!setmeta')) {
-            const isMod = userstate.mod || userstate['display-name'].toLowerCase() === channelName.toLowerCase();
-            if (!isMod) {
-                console.log(`Usuario ${userstate['display-name']} no tiene permisos para usar !setmeta`);
-                return;
-            }
+        const isMod = userstate.mod || userstate['display-name'].toLowerCase() === 'tangov91';
+        if (!isMod) return;
 
-            const parts = message.split(' ');
-            if (parts.length === 2 && !isNaN(parts[1])) {
-                const newGoal = parseInt(parts[1]);
+        if (message.startsWith('!meta ')) {
+            const arg = message.slice(6).trim();
+
+            if (!isNaN(arg)) {
+                const newGoal = parseInt(arg);
                 if (newGoal > 0) {
                     goalSubs = newGoal;
-                    console.log(`Nueva meta establecida: ${goalSubs}`);
-                    updateGoalText();
-                } else {
-                    console.log('Meta inválida: debe ser mayor que 0');
+                    console.log(`Nueva meta numérica: ${goalSubs}`);
                 }
-            } else {
-                console.log('Comando !setmeta inválido. Uso: !setmeta <número>');
+            } else if (arg.length > 0) {
+                goalTextLabel = arg.charAt(0).toUpperCase() + arg.slice(1);
+                console.log(`Nuevo texto de meta: ${goalTextLabel}`);
             }
+
+            updateGoalText();
         }
     });
 }
 
-// Inicializar el conteo de suscriptores al cargar
+// Iniciar carga
 initializeSubCount();
-
-// Si tmi.js ya está cargado, ejecutamos la lógica directamente
 if (typeof tmi !== 'undefined') {
     onTmiLoaded();
 } else {
-    console.log('Esperando a que tmi.js se cargue...');
+    loadLocalTmi();
 }
