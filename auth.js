@@ -1,8 +1,8 @@
 const axios = require('axios');
 
 const CLIENT_ID = '85b7pc94m2rofqg52m7o8jcvc9ywrq';
-const CLIENT_SECRET = 'qrx5r9si4fnu7mupo47bwc4laqrdkp';
-const CODE = 'triimbizysb9sljupvrv7csyaig8dq';
+const CLIENT_SECRET = 'qrx5r9si4fnu7mupo47bwc4laqrdkp'; // Reemplaza con tu Client Secret
+const CODE = 'triimbizysb9sljupvrv7csyaig8dq'; // Código de autorización
 const REDIRECT_URI = 'http://localhost:3000';
 
 async function getToken() {
