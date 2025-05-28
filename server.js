@@ -1,44 +1,42 @@
 const express = require('express');
 const axios = require('axios');
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
+
+const CLIENT_ID = '85b7pc94m2rofqg52m7o8jcvc9ywrq';
+const ACCESS_TOKEN = 'cdss4bpfd3e3m8r8d8isknj6fmk4ds';
 
 app.use(express.static('.'));
 
 app.get('/subs', async (req, res) => {
-    const channelName = req.query.channelName || 'blackelespanolito';
-    const clientId = '85b7pc94m2rofqg52m7o8jcvc9ywrq';
-    const accessToken = 'fxb7gty1wqm2zwb9u4bzl7fhmptyga';
+    const channelName = req.query.channelName;
+    if (!channelName) return res.status(400).send('Falta el parámetro channelName');
 
     try {
-        console.log(`Obteniendo ID del canal para ${channelName}...`);
-        const userResponse = await axios.get(`https://api.twitch.tv/helix/users?login=${channelName}`, {
+        const response = await axios.get(`https://api.twitch.tv/helix/users?login=${channelName}`, {
             headers: {
-                'Client-ID': clientId,
-                'Authorization': `Bearer ${accessToken}`,
-                'Accept': 'application/json'
+                'Client-ID': CLIENT_ID,
+                'Authorization': `Bearer ${ACCESS_TOKEN}`
             }
         });
-        console.log('User Data:', userResponse.data);
-        const channelId = userResponse.data.data[0].id;
 
-        console.log(`Obteniendo suscriptores para channelId ${channelId}...`);
-        const subsResponse = await axios.get(`https://api.twitch.tv/helix/subscriptions?broadcaster_id=${channelId}`, {
+        const userId = response.data.data[0].id;
+
+        const subsResponse = await axios.get(`https://api.twitch.tv/helix/subscriptions?broadcaster_id=${userId}`, {
             headers: {
-                'Client-ID': clientId,
-                'Authorization': `Bearer ${accessToken}`,
-                'Accept': 'application/json'
+                'Client-ID': CLIENT_ID,
+                'Authorization': `Bearer ${ACCESS_TOKEN}`
             }
         });
-        console.log('Subs Data:', subsResponse.data);
-        const totalSubs = subsResponse.data.total || 0;
-        res.json({ total: totalSubs });
+
+        const total = subsResponse.data.total;
+        res.json({ total });
     } catch (error) {
-        console.error('Error al obtener suscriptores:', error.message);
-        res.status(500).json({ error: 'Error al obtener suscriptores', details: error.message });
+        console.error('Error al obtener subs:', error.response?.data || error.message);
+        res.status(500).send('Error al obtener subs');
     }
 });
 
-app.listen(port, () => {
-    console.log(`Servidor corriendo en puerto ${port}`);
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
